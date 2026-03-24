@@ -1,4 +1,3 @@
-
 import re
 import json
 import datetime
@@ -7,7 +6,7 @@ from pathlib import Path
 import streamlit as st
 from docx import Document
 
-st.set_page_config(page_title="Prompts Gu Smart V4", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Prompts Gu Smart V4.1", page_icon="🧠", layout="wide")
 
 PLACEHOLDER_RE = re.compile(r"\[\s*([A-Z0-9_]+)\s*\]")
 BASE_MARKER = "[COLE AQUI O BLOCO BASE GLOBAL]"
@@ -99,32 +98,6 @@ Média:
 
 Baixa:
 {CONTEUDOS_SECUNDARIOS}
-
-REGRAS DE PLANEJAMENTO
-• Dividir o estudo por dias até a prova
-• Sessões de 15 a 25 minutos
-• Máximo de 1 conteúdo principal por dia
-• Priorizar primeiro os conteúdos de maior dificuldade e maior chance de cair
-• Incluir revisão final obrigatória no dia anterior à prova
-• Não sobrecarregar
-• Se houver pouco tempo, reduzir conteúdos secundários
-• O último dia antes da prova deve focar revisão e consolidação
-• No dia da prova, não incluir estudo formal; apenas descanso ou revisão mental leve
-
-IMPORTANTE
-• NÃO explicar conteúdo
-• NÃO ensinar
-• NÃO gerar exemplos
-• NÃO detalhar a aula
-• NÃO dividir o dia em dois blocos
-• Gerar o plano completo, nunca apenas um dia
-
-FORMATO OBRIGATÓRIO
-
-[DIA X]
-Conteúdo do dia:
-Duração:
-Objetivo:
 """
 
 def safe_format(template, values):
@@ -143,15 +116,6 @@ def recommend_material(days_left, situacao, prioridade):
     if prioridade == "alta":
         return "explicação curta + prática guiada + desafio leve + revisão de erros"
     return "resumo rápido + aplicação + mini quiz"
-
-def recommend_intensity(days_left, situacao):
-    if days_left <= 1:
-        return "baixa a moderada, foco em segurança"
-    if situacao == "em_dificuldade":
-        return "moderada com progressão curta"
-    if situacao == "novo":
-        return "moderada com construção gradual"
-    return "moderada com treino"
 
 def recommend_mode(days_left, situacao):
     if days_left <= 1:
@@ -174,6 +138,7 @@ Nível do aluno: {NIVEL_DO_ALUNO}
 Situação do conteúdo: {SITUACAO_CONTEUDO}
 Prioridade: {PRIORIDADE_DO_CONTEUDO}
 Modo de estudo: {MODO_ESTUDO}
+Nome do responsável: {NOME_DO_RESPONSAVEL}
 
 IMPORTANTE
 • usar as fontes apenas para entender a habilidade cobrada
@@ -183,80 +148,66 @@ IMPORTANTE
 • não infantilizar
 """, values)
 
-    if kind == "video":
-        body = """MATERIAL PARA NOTEBOOKLM STUDIO — VIDEO OVERVIEW
+    bodies = {
+        "video": """MATERIAL PARA NOTEBOOKLM STUDIO — VIDEO OVERVIEW
 
 OBJETIVO
-Criar um Video Overview realmente visual, em português do Brasil, para uma criança de 9 anos, com foco em clareza, atenção curta e compreensão progressiva.
+Criar um Video Overview realmente visual, em português do Brasil, para uma criança de 9 anos.
 
 INSTRUÇÕES OBRIGATÓRIAS
 • transformar o conteúdo em apresentação visual narrada
-• organizar em sequência lógica, como mini aula
+• organizar em sequência lógica
 • usar exemplos inéditos
-• priorizar elementos visuais e comparações concretas
-• incluir 1 gancho inicial, 3 exemplos progressivos e 1 mini desafio final
+• incluir gancho inicial, 3 exemplos progressivos e mini desafio final
 • destacar 1 erro comum
-
-ESTRUTURA
-1. abertura com gancho
-2. explicação visual da ideia central
-3. exemplo básico
-4. exemplo de aplicação
-5. desafio leve
-6. erro comum
-7. fechamento com mini desafio
-"""
-    elif kind == "audio":
-        body = """MATERIAL PARA NOTEBOOKLM STUDIO — AUDIO OVERVIEW
+""",
+        "audio": """MATERIAL PARA NOTEBOOKLM STUDIO — AUDIO OVERVIEW PARA O RESPONSÁVEL
 
 OBJETIVO
-Criar um Audio Overview curto, dinâmico e claro, em português do Brasil, como se fosse um professor particular explicando o conteúdo ao aluno.
+Criar um Audio Overview em português do Brasil direcionado ao responsável que vai ajudar a criança no estudo do dia.
 
 INSTRUÇÕES OBRIGATÓRIAS
-• som de conversa guiada, não palestra longa
-• frases curtas
-• incluir perguntas para o aluno pensar
-• incluir 3 exemplos progressivos
-• reforçar 1 erro comum
-• fechar com mini revisão e encorajamento
-"""
-    elif kind == "slides":
-        body = """MATERIAL PARA NOTEBOOKLM STUDIO — SLIDES
+• falar diretamente com o responsável
+• soar como um professor particular orientando a condução da aula
+• explicar o foco do estudo de hoje
+• mostrar como começar em 1 ou 2 passos simples
+• indicar onde a criança pode travar
+• explicar como ajudar sem dar a resposta
+• sugerir frases curtas que o responsável pode usar
+• incluir como retomar se a criança dispersar
+• fechar com orientação breve de encerramento positivo
+• duração curta, prática e acolhedora
+• não dar aula para o responsável; orientar a condução
+""",
+        "slides": """MATERIAL PARA NOTEBOOKLM STUDIO — SLIDES
 
 OBJETIVO
-Criar slides curtos, visuais e claros, para uma criança de 9 anos com atenção curta.
+Criar slides curtos, visuais e claros.
 
 INSTRUÇÕES OBRIGATÓRIAS
 • poucos slides
 • cada slide com título curto
 • no máximo 2 a 4 pontos por slide
-• usar exemplos visuais e concretos
-• progressão:
-  - slide 1: ideia central
-  - slide 2: exemplo básico
-  - slide 3: aplicação
-  - slide 4: erro comum
-  - slide 5: mini desafio
-"""
-    elif kind == "quiz":
-        body = """MATERIAL PARA NOTEBOOKLM STUDIO — QUIZ / FLASHCARDS
+• progressão: ideia central, exemplo básico, aplicação, erro comum, mini desafio
+""",
+        "quiz": """MATERIAL PARA NOTEBOOKLM STUDIO — FLASHCARDS / QUIZ
 
 OBJETIVO
-Criar um quiz rápido ou flashcards para revisão ativa, com progressão de dificuldade.
+Criar flashcards ou quiz para revisão ativa.
 
 INSTRUÇÕES OBRIGATÓRIAS
-• 5 itens no máximo
+• gerar no máximo 10 flashcards ou 10 perguntas
+• nunca gerar 50 itens
 • começar com confiança
 • avançar para aplicação
 • terminar com desafio leve
 • incluir pelo menos 1 erro comum
 • respostas com explicação curtíssima
-"""
-    else:
-        body = """MATERIAL PARA NOTEBOOKLM STUDIO — REPORT / RESUMO
+""",
+        "report": """MATERIAL PARA NOTEBOOKLM STUDIO — REPORT / RESUMO
 
 OBJETIVO
-Criar um resumo estratégico do conteúdo do dia, visualmente organizado, destacando o que mais importa.
+Criar um resumo estratégico do conteúdo do dia.
 
 INSTRUÇÕES OBRIGATÓRIAS
 • resumir a ideia central
@@ -264,9 +215,9 @@ INSTRUÇÕES OBRIGATÓRIAS
 • destacar erro comum
 • incluir 1 exemplo curto
 • incluir 1 mini desafio
-• manter texto enxuto e muito claro
 """
-    return common + "\n\n" + body
+    }
+    return common + "\n\n" + bodies[kind]
 
 def iter_paragraphs_in_table(table):
     for row in table.rows:
@@ -274,15 +225,13 @@ def iter_paragraphs_in_table(table):
             for p in cell.paragraphs:
                 yield p
             for nested in cell.tables:
-                for np in iter_paragraphs_in_table(nested):
-                    yield np
+                yield from iter_paragraphs_in_table(nested)
 
 def all_paragraphs(doc):
     for p in doc.paragraphs:
         yield p
     for table in doc.tables:
-        for p in iter_paragraphs_in_table(table):
-            yield p
+        yield from iter_paragraphs_in_table(table)
     for section in doc.sections:
         for p in section.header.paragraphs:
             yield p
@@ -353,15 +302,8 @@ def generate_doc_from_template(uploaded_file, values):
 def export_json(values):
     return json.dumps(values, ensure_ascii=False, indent=2).encode("utf-8")
 
-st.markdown("""
-<style>
-.block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
-.small-card {border: 1px solid rgba(49,51,63,0.15); border-radius: 16px; padding: 14px 16px; background: rgba(250,250,252,0.8);}
-</style>
-""", unsafe_allow_html=True)
-
-st.title("Prompts Gu — Smart Web V4")
-st.caption("A aba 2 gera prompts separados para a aba Studio do NotebookLM.")
+st.title("Prompts Gu — Smart Web V4.1")
+st.caption("Correções: áudio para o responsável e flashcards/quiz com no máximo 10 itens.")
 
 with st.sidebar:
     st.header("Perfil base")
@@ -389,10 +331,10 @@ with tab1:
     values["BASE"] = safe_format(BASE_BLOCK_TEMPLATE, values)
     prompt_crono = safe_format(CRONOGRAMA_TEMPLATE, values)
 
-    st.text_area("Prompt de cronograma", value=prompt_crono, height=420)
+    st.text_area("Prompt de cronograma", value=prompt_crono, height=260)
     c1, c2 = st.columns(2)
-    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v4.txt")
-    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores_v4.json")
+    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v4_1.txt")
+    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores_v4_1.json")
 
 with tab2:
     st.subheader("Gerar instruções para a aba Studio do NotebookLM")
@@ -416,47 +358,27 @@ with tab2:
         days_num = 5
 
     tipo = recommend_material(days_num, situacao, prioridade_conteudo)
-    intensidade = recommend_intensity(days_num, situacao)
     modo = recommend_mode(days_num, situacao)
 
-    k1, k2, k3 = st.columns(3)
-    k1.markdown(f'<div class="small-card"><strong>Dias até a prova</strong><br>{dias_restantes}</div>', unsafe_allow_html=True)
-    k2.markdown(f'<div class="small-card"><strong>Modo de estudo</strong><br>{modo}</div>', unsafe_allow_html=True)
-    k3.markdown(f'<div class="small-card"><strong>Tipo recomendado</strong><br>{tipo}</div>', unsafe_allow_html=True)
-
     values2 = dict(st.session_state)
-    values2.update({"MATERIA": materia2, "CONTEUDO_DO_DIA": conteudo_dia, "DATA_DE_HOJE": data_hoje2, "DATA_DA_PROVA": data_prova2, "DIAS_RESTANTES": dias_restantes, "SITUACAO_CONTEUDO": situacao, "PRIORIDADE_DO_CONTEUDO": prioridade_conteudo, "TIPO_DE_MATERIAL": tipo, "INTENSIDADE": intensidade, "MODO_ESTUDO": modo, "NIVEL_DO_ALUNO": nivel, "DURACAO_DESEJADA": duracao})
+    values2.update({"MATERIA": materia2, "CONTEUDO_DO_DIA": conteudo_dia, "DATA_DE_HOJE": data_hoje2, "DATA_DA_PROVA": data_prova2, "DIAS_RESTANTES": dias_restantes, "SITUACAO_CONTEUDO": situacao, "PRIORIDADE_DO_CONTEUDO": prioridade_conteudo, "TIPO_DE_MATERIAL": tipo, "MODO_ESTUDO": modo, "NIVEL_DO_ALUNO": nivel, "DURACAO_DESEJADA": duracao})
     values2["BASE"] = safe_format(BASE_BLOCK_TEMPLATE, values2)
-
-    video_txt = make_prompt("video", values2)
-    audio_txt = make_prompt("audio", values2)
-    slides_txt = make_prompt("slides", values2)
-    quiz_txt = make_prompt("quiz", values2)
-    report_txt = make_prompt("report", values2)
 
     st.info("Use cada bloco abaixo no tipo certo de material dentro da aba Studio do NotebookLM.")
 
-    with st.expander("Prompt para Video Overview", expanded=True):
-        st.text_area("Video Overview", value=video_txt, height=260)
-        st.download_button("Baixar prompt de vídeo", video_txt.encode("utf-8"), file_name="studio_video_overview_v4.txt")
+    for title, kind, fname in [
+        ("🎬 Prompt para Video Overview", "video", "studio_video_overview_v4_1.txt"),
+        ("🎧 Prompt para Audio Overview (responsável)", "audio", "studio_audio_responsavel_v4_1.txt"),
+        ("🧩 Prompt para Slides", "slides", "studio_slides_v4_1.txt"),
+        ("❓ Prompt para Flashcards / Quiz", "quiz", "studio_quiz_v4_1.txt"),
+        ("📝 Prompt para Report / Resumo", "report", "studio_report_v4_1.txt"),
+    ]:
+        txt = make_prompt(kind, values2)
+        with st.expander(title, expanded=(kind == "video")):
+            st.text_area(title, value=txt, height=220, key=f"ta_{kind}")
+            st.download_button(f"Baixar {title}", txt.encode("utf-8"), file_name=fname)
 
-    with st.expander("Prompt para Audio Overview"):
-        st.text_area("Audio Overview", value=audio_txt, height=220)
-        st.download_button("Baixar prompt de áudio", audio_txt.encode("utf-8"), file_name="studio_audio_overview_v4.txt")
-
-    with st.expander("Prompt para Slides"):
-        st.text_area("Slides", value=slides_txt, height=220)
-        st.download_button("Baixar prompt de slides", slides_txt.encode("utf-8"), file_name="studio_slides_v4.txt")
-
-    with st.expander("Prompt para Quiz / Flashcards"):
-        st.text_area("Quiz / Flashcards", value=quiz_txt, height=220)
-        st.download_button("Baixar prompt de quiz", quiz_txt.encode("utf-8"), file_name="studio_quiz_v4.txt")
-
-    with st.expander("Prompt para Report / Resumo"):
-        st.text_area("Report / Resumo", value=report_txt, height=200)
-        st.download_button("Baixar prompt de report", report_txt.encode("utf-8"), file_name="studio_report_v4.txt")
-
-    st.download_button("Baixar JSON da sessão", export_json(values2), file_name="studio_valores_v4.json")
+    st.download_button("Baixar JSON da sessão", export_json(values2), file_name="studio_valores_v4_1.json")
 
 with tab3:
     st.subheader("Preencher seu DOCX")
@@ -474,37 +396,15 @@ with tab3:
         values3["DATA_DA_PROVA"] = c2.text_input("DATA_DA_PROVA", value=values3.get("DATA_DA_PROVA", ""))
         values3["CONTEUDO_DO_DIA"] = st.text_input("CONTEUDO_DO_DIA", value=values3.get("CONTEUDO_DO_DIA", ""))
         values3["CONTEUDOS_DA_PROVA"] = st.text_area("CONTEUDOS_DA_PROVA", value=values3.get("CONTEUDOS_DA_PROVA", ""), height=120)
-        values3["OUTRAS_PROVAS_NO_PERIODO"] = st.text_input("OUTRAS_PROVAS_NO_PERIODO", value=values3.get("OUTRAS_PROVAS_NO_PERIODO", ""))
-        p1, p2, p3 = st.columns(3)
-        values3["PRIORIDADES"] = p1.text_area("PRIORIDADES", value=values3.get("PRIORIDADES", ""), height=100)
-        values3["CONTEUDOS_MEDIOS"] = p2.text_area("CONTEUDOS_MEDIOS", value=values3.get("CONTEUDOS_MEDIOS", ""), height=100)
-        values3["CONTEUDOS_SECUNDARIOS"] = p3.text_area("CONTEUDOS_SECUNDARIOS", value=values3.get("CONTEUDOS_SECUNDARIOS", ""), height=100)
-        values3["DURACAO_DESEJADA"] = st.text_input("DURACAO_DESEJADA", value=values3.get("DURACAO_DESEJADA", "15 a 25 minutos"))
-
-        try:
-            hoje_dt = datetime.datetime.strptime(values3["DATA_DE_HOJE"], "%d/%m/%Y")
-            prova_dt = datetime.datetime.strptime(values3["DATA_DA_PROVA"], "%d/%m/%Y") if values3["DATA_DA_PROVA"] else hoje_dt
-            days_num = (prova_dt - hoje_dt).days
-        except Exception:
-            days_num = 5
-
-        s1, s2 = st.columns(2)
-        situ_doc = s1.selectbox("Situação do conteúdo do dia", ["novo", "ja_visto", "em_dificuldade"], index=0, key="doc_situ")
-        pri_doc = s2.selectbox("Prioridade do conteúdo do dia", ["alta", "media", "baixa"], index=0, key="doc_pri")
-        values3["TIPO_DE_MATERIAL"] = recommend_material(days_num, situ_doc, pri_doc)
-
-        st.info("TIPO_DE_MATERIAL sugerido automaticamente: " + values3["TIPO_DE_MATERIAL"])
 
         with st.expander("Editar manualmente qualquer placeholder do DOCX"):
             for ph in placeholders:
                 if ph not in values3:
                     values3[ph] = st.text_input(ph, value="", key="ph_" + ph)
 
-        x1, x2 = st.columns(2)
-        if x1.button("Preparar DOCX preenchido"):
+        if st.button("Preparar DOCX preenchido"):
             output = generate_doc_from_template(uploaded, values3)
-            name = Path(uploaded.name).stem + "_preenchido_v4_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
+            name = Path(uploaded.name).stem + "_preenchido_v4_1_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
             st.download_button("Baixar DOCX preenchido", data=output.getvalue(), file_name=name, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-        x2.download_button("Baixar JSON do DOCX", export_json(values3), file_name="docx_valores_v4.json")
     else:
         st.info("Envie o arquivo de prompts em .docx para preencher aqui.")
