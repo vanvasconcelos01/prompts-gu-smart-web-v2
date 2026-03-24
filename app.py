@@ -197,7 +197,6 @@ Criar flashcards ou quiz para revisão ativa.
 
 INSTRUÇÕES OBRIGATÓRIAS
 • gerar no máximo 10 flashcards ou 10 perguntas
-• nunca gerar 50 itens
 • começar com confiança
 • avançar para aplicação
 • terminar com desafio leve
