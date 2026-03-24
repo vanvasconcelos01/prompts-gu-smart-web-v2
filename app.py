@@ -355,7 +355,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 Prompts Gu — Smart Web V2")
+st.title("🧠 Prompts Gu — Smart Web V3")
 st.caption("Versão V2 com organização melhor, modo pré-prova e exportação fácil de JSON e prompts.")
 
 with st.sidebar:
