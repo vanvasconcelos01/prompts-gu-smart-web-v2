@@ -7,7 +7,7 @@ from pathlib import Path
 import streamlit as st
 from docx import Document
 
-st.set_page_config(page_title="Prompts Gu Smart V2", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Prompts Gu Smart V3", page_icon="🧠", layout="wide")
 
 PLACEHOLDER_RE = re.compile(r"\[\s*([A-Z0-9_]+)\s*\]")
 BASE_MARKER = "[COLE AQUI O BLOCO BASE GLOBAL]"
