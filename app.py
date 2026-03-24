@@ -212,12 +212,84 @@ REGRAS CRÍTICAS
 FORMATO OBRIGATÓRIO
 [TIPO ESCOLHIDO AUTOMATICAMENTE]
 [OBJETIVO DA SESSÃO]
-[AQUECIMENTO]
-[EXPLICAÇÃO]
+[ROTEIRO DE VÍDEO]
+[SLIDES]
 [EXEMPLOS PROGRESSIVOS]
 [PRÁTICA GUIADA]
 [MINI QUIZ]
 [ORIENTAÇÃO PARA O RESPONSÁVEL]
+"""
+
+FULL_LESSON_TEMPLATE = """{BASE}
+
+GERAR AULA COMPLETA — MODO VISUAL AUTOMÁTICO
+
+CONTEXTO
+Matéria: {MATERIA}
+Conteúdo do dia: {CONTEUDO_DO_DIA}
+Data de hoje: {DATA_DE_HOJE}
+Data da prova: {DATA_DA_PROVA}
+Dias restantes até a prova: {DIAS_RESTANTES}
+Nível do aluno: {NIVEL_DO_ALUNO}
+Situação do conteúdo: {SITUACAO_CONTEUDO}
+Prioridade do conteúdo: {PRIORIDADE_DO_CONTEUDO}
+Duração desejada: {DURACAO_DESEJADA}
+Tipo de material recomendado automaticamente: {TIPO_DE_MATERIAL}
+Modo de estudo: {MODO_ESTUDO}
+
+OBJETIVO
+Criar uma aula completa, visual e interativa para o aluno, pronta para ser usada no NotebookLM com base nas fontes da matéria.
+
+DECISÃO PEDAGÓGICA
+• Se o conteúdo for novo, começar com construção clara e exemplos concretos
+• Se o conteúdo já foi visto, avançar mais rápido para treino e aplicação
+• Se houver dificuldade, reduzir a complexidade inicial e aumentar gradualmente
+• Se estiver perto da prova, priorizar precisão, revisão estratégica e segurança
+
+ENTREGA OBRIGATÓRIA
+
+1. VISÃO RÁPIDA DA AULA
+• objetivo em 1 ou 2 frases
+• habilidade principal do dia
+• erro comum que merece atenção
+
+2. ROTEIRO DE VÍDEO
+• abertura com gancho
+• explicação falada
+• pausas de interação
+• perguntas ao aluno
+• fechamento com mini desafio
+
+3. SLIDES DA AULA
+• slides curtos
+• títulos claros
+• tópicos objetivos
+• exemplos visuais
+
+4. EXEMPLOS PROGRESSIVOS
+• básico
+• aplicação
+• desafio leve
+
+5. PRÁTICA GUIADA
+• exercícios com resolução passo a passo
+• mostrar o raciocínio
+
+6. MINI QUIZ
+• 3 perguntas rápidas
+
+7. ORIENTAÇÃO PARA O RESPONSÁVEL
+• como conduzir
+• onde o aluno pode travar
+• como ajudar sem dar a resposta
+
+REGRAS CRÍTICAS
+• não copiar do livro
+• usar as fontes só para entender a habilidade cobrada
+• criar exemplos inéditos
+• manter linguagem clara, visual e respeitosa
+• não infantilizar
+• evitar blocos longos de texto
 """
 
 def safe_format(template, values):
@@ -279,7 +351,7 @@ def all_paragraphs(doc):
 def extract_placeholders(doc):
     found = set()
     for p in all_paragraphs(doc):
-        txt = p.text.replace("\n", "")
+        txt = p.text.replace("\\n", "")
         found.update(PLACEHOLDER_RE.findall(txt))
     return sorted(found)
 
@@ -295,16 +367,16 @@ def get_base_block_text_from_doc(doc):
     collected = []
     for p in paragraphs[start + 1:]:
         txt = p.text.strip()
-        if re.match(r"^\d+\.", txt):
+        if re.match(r"^\\d+\\.", txt):
             break
         collected.append(p.text)
-    return "\n".join(collected).strip()
+    return "\\n".join(collected).strip()
 
 def replace_in_runs(paragraph, replacements):
     full = paragraph.text
     new = full
     for key, value in replacements.items():
-        pattern = r"\[\s*" + re.escape(key) + r"\s*\]"
+        pattern = r"\\[\\s*" + re.escape(key) + r"\\s*\\]"
         new = re.sub(pattern, value, new)
     if new != full:
         if paragraph.runs:
@@ -331,8 +403,7 @@ def generate_doc_from_template(uploaded_file, values):
     uploaded_file.seek(0)
     doc = Document(uploaded_file)
     vals = dict(values)
-    base_from_doc = get_base_block_text_from_doc(doc)
-    vals["__BASE_BLOCK__"] = base_from_doc if base_from_doc else safe_format(BASE_BLOCK_TEMPLATE, vals)
+    vals["__BASE_BLOCK__"] = get_base_block_text_from_doc(doc) or safe_format(BASE_BLOCK_TEMPLATE, vals)
     replace_everywhere(doc, vals)
     bio = BytesIO()
     doc.save(bio)
@@ -344,19 +415,18 @@ def export_json(values):
 
 st.markdown("""
 <style>
-.block-container {padding-top: 1.5rem; padding-bottom: 2rem;}
+.block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
 .small-card {
     border: 1px solid rgba(49,51,63,0.15);
     border-radius: 16px;
     padding: 14px 16px;
     background: rgba(250,250,252,0.8);
 }
-.copy-box textarea {font-size: 0.95rem;}
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🧠 Prompts Gu — Smart Web V3")
-st.caption("Versão V2 com organização melhor, modo pré-prova e exportação fácil de JSON e prompts.")
+st.caption("Agora com botão 'Gerar aula completa' e modo visual automático embutido.")
 
 with st.sidebar:
     st.header("Perfil base")
@@ -395,11 +465,11 @@ with tab1:
 
     st.text_area("Prompt de cronograma", value=prompt_crono, height=420, key="cronograma_box")
     c1, c2 = st.columns(2)
-    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v2.txt")
-    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores.json")
+    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v3.txt")
+    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores_v3.json")
 
 with tab2:
-    st.subheader("Gerar sessão inteligente do dia")
+    st.subheader("Sessão inteligente do dia")
     c1, c2, c3 = st.columns(3)
     materia2 = c1.text_input("Matéria", value=st.session_state.get("MATERIA", ""), key="t2_materia")
     conteudo_dia = c1.text_input("Conteúdo do dia", value=st.session_state.get("CONTEUDO_DO_DIA", ""))
@@ -445,11 +515,29 @@ with tab2:
     })
     values2["BASE"] = safe_format(BASE_BLOCK_TEMPLATE, values2)
     prompt_day = safe_format(SMART_DAILY_TEMPLATE, values2)
+    full_lesson_prompt = safe_format(FULL_LESSON_TEMPLATE, values2)
 
-    st.text_area("Prompt diário inteligente", value=prompt_day, height=500, key="sessao_box")
-    d1, d2 = st.columns(2)
-    d1.download_button("Baixar prompt do dia .txt", prompt_day.encode("utf-8"), file_name="prompt_dia_inteligente_v2.txt")
-    d2.download_button("Baixar JSON da sessão", export_json(values2), file_name="sessao_valores.json")
+    st.text_area("Prompt diário inteligente", value=prompt_day, height=370, key="sessao_box")
+
+    b1, b2, b3 = st.columns(3)
+    b1.download_button("Baixar prompt do dia .txt", prompt_day.encode("utf-8"), file_name="prompt_dia_inteligente_v3.txt")
+    b2.download_button("Baixar JSON da sessão", export_json(values2), file_name="sessao_valores_v3.json")
+    if b3.button("Gerar aula completa"):
+        st.session_state["full_lesson_prompt"] = full_lesson_prompt
+
+    if st.session_state.get("full_lesson_prompt"):
+        st.subheader("Aula completa pronta para colar no NotebookLM")
+        st.text_area(
+            "Prompt aula completa",
+            value=st.session_state["full_lesson_prompt"],
+            height=520,
+            key="full_lesson_box"
+        )
+        st.download_button(
+            "Baixar aula completa .txt",
+            st.session_state["full_lesson_prompt"].encode("utf-8"),
+            file_name="aula_completa_v3.txt"
+        )
 
 with tab3:
     st.subheader("Preencher seu DOCX")
@@ -493,11 +581,11 @@ with tab3:
                 if ph not in values3:
                     values3[ph] = st.text_input(ph, value="", key="ph_" + ph)
 
-        b1, b2 = st.columns(2)
-        if b1.button("Preparar DOCX preenchido"):
+        x1, x2 = st.columns(2)
+        if x1.button("Preparar DOCX preenchido"):
             output = generate_doc_from_template(uploaded, values3)
-            name = Path(uploaded.name).stem + "_preenchido_v2_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
+            name = Path(uploaded.name).stem + "_preenchido_v3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
             st.download_button("Baixar DOCX preenchido", data=output.getvalue(), file_name=name, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-        b2.download_button("Baixar JSON do DOCX", export_json(values3), file_name="docx_valores.json")
+        x2.download_button("Baixar JSON do DOCX", export_json(values3), file_name="docx_valores_v3.json")
     else:
         st.info("Envie o arquivo de prompts em .docx para preencher aqui.")
