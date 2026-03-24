@@ -1,3 +1,4 @@
+
 import re
 import json
 import datetime
@@ -6,7 +7,7 @@ from pathlib import Path
 import streamlit as st
 from docx import Document
 
-st.set_page_config(page_title="Prompts Gu Smart V4.1", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Prompts Gu Smart V4.2", page_icon="🧠", layout="wide")
 
 PLACEHOLDER_RE = re.compile(r"\[\s*([A-Z0-9_]+)\s*\]")
 BASE_MARKER = "[COLE AQUI O BLOCO BASE GLOBAL]"
@@ -98,6 +99,32 @@ Média:
 
 Baixa:
 {CONTEUDOS_SECUNDARIOS}
+
+REGRAS DE PLANEJAMENTO
+• Dividir o estudo por dias até a prova
+• Sessões de 15 a 25 minutos
+• Máximo de 1 conteúdo principal por dia
+• Priorizar primeiro os conteúdos de maior dificuldade e maior chance de cair
+• Incluir revisão final obrigatória no dia anterior à prova
+• Não sobrecarregar
+• Se houver pouco tempo, reduzir conteúdos secundários
+• O último dia antes da prova deve focar revisão e consolidação
+• No dia da prova, não incluir estudo formal; apenas descanso ou revisão mental leve
+
+IMPORTANTE
+• NÃO explicar conteúdo
+• NÃO ensinar
+• NÃO gerar exemplos
+• NÃO detalhar a aula
+• NÃO dividir o dia em dois blocos
+• Gerar o plano completo, nunca apenas um dia
+
+FORMATO OBRIGATÓRIO
+
+[DIA X]
+Conteúdo do dia:
+Duração:
+Objetivo:
 """
 
 def safe_format(template, values):
@@ -125,6 +152,9 @@ def recommend_mode(days_left, situacao):
     if situacao == "em_dificuldade":
         return "retomada estratégica"
     return "treino com consolidação"
+
+def date_to_br(dt):
+    return dt.strftime("%d/%m/%Y")
 
 def make_prompt(kind, values):
     common = safe_format("""{BASE}
@@ -176,7 +206,7 @@ INSTRUÇÕES OBRIGATÓRIAS
 • sugerir frases curtas que o responsável pode usar
 • incluir como retomar se a criança dispersar
 • fechar com orientação breve de encerramento positivo
-• duração curta, prática e acolhedora
+• duração máxima: 5 minutos
 • não dar aula para o responsável; orientar a condução
 """,
         "slides": """MATERIAL PARA NOTEBOOKLM STUDIO — SLIDES
@@ -196,7 +226,10 @@ OBJETIVO
 Criar flashcards ou quiz para revisão ativa.
 
 INSTRUÇÕES OBRIGATÓRIAS
-• gerar no máximo 10 flashcards ou 10 perguntas
+• gerar exatamente entre 5 e 10 flashcards ou perguntas
+• limite absoluto: no máximo 10 itens
+• é proibido gerar mais de 10 itens
+• nunca gerar 50 itens
 • começar com confiança
 • avançar para aplicação
 • terminar com desafio leve
@@ -240,7 +273,7 @@ def all_paragraphs(doc):
 def extract_placeholders(doc):
     found = set()
     for p in all_paragraphs(doc):
-        found.update(PLACEHOLDER_RE.findall(p.text.replace("\n", "")))
+        found.update(PLACEHOLDER_RE.findall(p.text.replace("\\n", "")))
     return sorted(found)
 
 def get_base_block_text_from_doc(doc):
@@ -255,16 +288,16 @@ def get_base_block_text_from_doc(doc):
     collected = []
     for p in paragraphs[start + 1:]:
         txt = p.text.strip()
-        if re.match(r"^\d+\.", txt):
+        if re.match(r"^\\d+\\.", txt):
             break
         collected.append(p.text)
-    return "\n".join(collected).strip()
+    return "\\n".join(collected).strip()
 
 def replace_in_runs(paragraph, replacements):
     full = paragraph.text
     new = full
     for key, value in replacements.items():
-        pattern = r"\[\s*" + re.escape(key) + r"\s*\]"
+        pattern = r"\\[\\s*" + re.escape(key) + r"\\s*\\]"
         new = re.sub(pattern, value, new)
     if new != full:
         if paragraph.runs:
@@ -301,8 +334,15 @@ def generate_doc_from_template(uploaded_file, values):
 def export_json(values):
     return json.dumps(values, ensure_ascii=False, indent=2).encode("utf-8")
 
-st.title("Prompts Gu — Smart Web V4.1")
-st.caption("Correções: áudio para o responsável e flashcards/quiz com no máximo 10 itens.")
+st.markdown("""
+<style>
+.block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
+.small-card {border: 1px solid rgba(49,51,63,0.15); border-radius: 16px; padding: 14px 16px; background: rgba(250,250,252,0.8);}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("Prompts Gu — Smart Web V4.2")
+st.caption("Correções: áudio até 5 min, flashcards no máximo 10, e calendário para data da prova.")
 
 with st.sidebar:
     st.header("Perfil base")
@@ -316,8 +356,10 @@ with tab1:
     st.subheader("Montar cronograma até a prova")
     a, b = st.columns(2)
     materia = a.text_input("Matéria", value=st.session_state.get("MATERIA", ""))
-    data_hoje = a.text_input("Data de hoje", value=datetime.datetime.now().strftime("%d/%m/%Y"))
-    data_prova = b.text_input("Data da prova", value=st.session_state.get("DATA_DA_PROVA", ""))
+    hoje_dt = a.date_input("Data de hoje", value=datetime.date.today(), format="DD/MM/YYYY")
+    prova_dt = b.date_input("Data da prova", value=datetime.date.today(), format="DD/MM/YYYY")
+    data_hoje = date_to_br(hoje_dt)
+    data_prova = date_to_br(prova_dt)
     outras = st.text_input("Outras provas no período", value=st.session_state.get("OUTRAS_PROVAS_NO_PERIODO", ""))
     conteudos = st.text_area("Conteúdos da prova", value=st.session_state.get("CONTEUDOS_DA_PROVA", ""), height=120)
     p1, p2, p3 = st.columns(3)
@@ -332,29 +374,25 @@ with tab1:
 
     st.text_area("Prompt de cronograma", value=prompt_crono, height=260)
     c1, c2 = st.columns(2)
-    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v4_1.txt")
-    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores_v4_1.json")
+    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v4_2.txt")
+    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores_v4_2.json")
 
 with tab2:
     st.subheader("Gerar instruções para a aba Studio do NotebookLM")
     c1, c2, c3 = st.columns(3)
     materia2 = c1.text_input("Matéria", value=st.session_state.get("MATERIA", ""), key="t2_materia")
     conteudo_dia = c1.text_input("Conteúdo do dia", value=st.session_state.get("CONTEUDO_DO_DIA", ""))
-    data_hoje2 = c2.text_input("Data de hoje", value=datetime.datetime.now().strftime("%d/%m/%Y"), key="t2_hoje")
-    data_prova2 = c2.text_input("Data da prova", value=st.session_state.get("DATA_DA_PROVA", ""), key="t2_prova")
+    hoje2_dt = c2.date_input("Data de hoje", value=datetime.date.today(), format="DD/MM/YYYY", key="t2_hoje")
+    prova2_dt = c2.date_input("Data da prova", value=datetime.date.today(), format="DD/MM/YYYY", key="t2_prova")
+    data_hoje2 = date_to_br(hoje2_dt)
+    data_prova2 = date_to_br(prova2_dt)
     situacao = c3.selectbox("Situação do conteúdo", ["novo", "ja_visto", "em_dificuldade"], index=0)
     prioridade_conteudo = c3.selectbox("Prioridade", ["alta", "media", "baixa"], index=0)
     duracao = st.text_input("Duração desejada", value=st.session_state.get("DURACAO_DESEJADA", "15 a 25 minutos"))
     nivel = st.text_input("Nível do aluno", value=st.session_state.get("NIVEL_DO_ALUNO", DEFAULTS["NIVEL_DO_ALUNO"]))
 
-    dias_restantes = "não calculado"
-    try:
-        hoje_dt = datetime.datetime.strptime(data_hoje2, "%d/%m/%Y")
-        prova_dt = datetime.datetime.strptime(data_prova2, "%d/%m/%Y")
-        days_num = (prova_dt - hoje_dt).days
-        dias_restantes = str(days_num)
-    except Exception:
-        days_num = 5
+    days_num = (prova2_dt - hoje2_dt).days
+    dias_restantes = str(days_num)
 
     tipo = recommend_material(days_num, situacao, prioridade_conteudo)
     modo = recommend_mode(days_num, situacao)
@@ -366,18 +404,18 @@ with tab2:
     st.info("Use cada bloco abaixo no tipo certo de material dentro da aba Studio do NotebookLM.")
 
     for title, kind, fname in [
-        ("🎬 Prompt para Video Overview", "video", "studio_video_overview_v4_1.txt"),
-        ("🎧 Prompt para Audio Overview (responsável)", "audio", "studio_audio_responsavel_v4_1.txt"),
-        ("🧩 Prompt para Slides", "slides", "studio_slides_v4_1.txt"),
-        ("❓ Prompt para Flashcards / Quiz", "quiz", "studio_quiz_v4_1.txt"),
-        ("📝 Prompt para Report / Resumo", "report", "studio_report_v4_1.txt"),
+        ("🎬 Prompt para Video Overview", "video", "studio_video_overview_v4_2.txt"),
+        ("🎧 Prompt para Audio Overview (responsável)", "audio", "studio_audio_responsavel_v4_2.txt"),
+        ("🧩 Prompt para Slides", "slides", "studio_slides_v4_2.txt"),
+        ("❓ Prompt para Flashcards / Quiz", "quiz", "studio_quiz_v4_2.txt"),
+        ("📝 Prompt para Report / Resumo", "report", "studio_report_v4_2.txt"),
     ]:
         txt = make_prompt(kind, values2)
         with st.expander(title, expanded=(kind == "video")):
             st.text_area(title, value=txt, height=220, key=f"ta_{kind}")
             st.download_button(f"Baixar {title}", txt.encode("utf-8"), file_name=fname)
 
-    st.download_button("Baixar JSON da sessão", export_json(values2), file_name="studio_valores_v4_1.json")
+    st.download_button("Baixar JSON da sessão", export_json(values2), file_name="studio_valores_v4_2.json")
 
 with tab3:
     st.subheader("Preencher seu DOCX")
@@ -391,8 +429,10 @@ with tab3:
         values3 = dict(st.session_state)
         c1, c2 = st.columns(2)
         values3["MATERIA"] = c1.text_input("MATERIA", value=values3.get("MATERIA", ""))
-        values3["DATA_DE_HOJE"] = c1.text_input("DATA_DE_HOJE", value=datetime.datetime.now().strftime("%d/%m/%Y"))
-        values3["DATA_DA_PROVA"] = c2.text_input("DATA_DA_PROVA", value=values3.get("DATA_DA_PROVA", ""))
+        hoje3_dt = c1.date_input("DATA_DE_HOJE", value=datetime.date.today(), format="DD/MM/YYYY", key="doc_hoje")
+        prova3_dt = c2.date_input("DATA_DA_PROVA", value=datetime.date.today(), format="DD/MM/YYYY", key="doc_prova")
+        values3["DATA_DE_HOJE"] = date_to_br(hoje3_dt)
+        values3["DATA_DA_PROVA"] = date_to_br(prova3_dt)
         values3["CONTEUDO_DO_DIA"] = st.text_input("CONTEUDO_DO_DIA", value=values3.get("CONTEUDO_DO_DIA", ""))
         values3["CONTEUDOS_DA_PROVA"] = st.text_area("CONTEUDOS_DA_PROVA", value=values3.get("CONTEUDOS_DA_PROVA", ""), height=120)
 
@@ -403,7 +443,7 @@ with tab3:
 
         if st.button("Preparar DOCX preenchido"):
             output = generate_doc_from_template(uploaded, values3)
-            name = Path(uploaded.name).stem + "_preenchido_v4_1_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
+            name = Path(uploaded.name).stem + "_preenchido_v4_2_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
             st.download_button("Baixar DOCX preenchido", data=output.getvalue(), file_name=name, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     else:
         st.info("Envie o arquivo de prompts em .docx para preencher aqui.")
