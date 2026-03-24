@@ -152,13 +152,54 @@ REGRAS DE DECISÃO
 • Se o conteúdo já foi visto, avance mais rápido para prática e correção
 • Se houver dificuldade, reduza a complexidade inicial e aumente progressivamente
 
-O QUE VOCÊ DEVE GERAR HOJE
-1. aquecimento rápido
-2. explicação curta
-3. 3 exemplos progressivos
-4. prática guiada
-5. mini quiz com 3 perguntas
-6. orientação curta para o responsável
+MODO VISUAL AUTOMÁTICO (OBRIGATÓRIO)
+
+O conteúdo deve ser gerado sempre em formato visual, dinâmico e interativo, adequado para uma criança com TDAH.
+
+Você deve gerar a sessão completa nos seguintes formatos:
+
+1. ROTEIRO DE VÍDEO (PRINCIPAL)
+• Explicação como se fosse falada
+• Frases curtas e naturais
+• Incluir pausas para interação com o aluno
+• Fazer perguntas durante a explicação
+• Linguagem envolvente e clara
+• Simular um professor conversando com o aluno
+
+2. VERSÃO EM SLIDES (RESUMO VISUAL)
+• Transformar o conteúdo em slides
+• Cada slide com:
+  - título curto
+  - 2 a 4 pontos
+  - exemplos simples
+• Evitar texto longo
+• Priorizar clareza visual
+
+3. EXEMPLOS PROGRESSIVOS
+• 1 exemplo básico
+• 1 exemplo de aplicação
+• 1 desafio leve
+• Sempre com explicação clara
+
+4. PRÁTICA GUIADA
+• Exercícios com resolução passo a passo
+• Mostrar o raciocínio, não apenas a resposta
+
+5. MINI QUIZ
+• 3 perguntas rápidas
+• Misturar fácil + médio + desafio leve
+
+6. ORIENTAÇÃO PARA O RESPONSÁVEL
+• Como conduzir a explicação
+• Onde o aluno pode ter dificuldade
+• Como ajudar sem dar resposta
+
+REGRAS VISUAIS CRÍTICAS
+• Evitar blocos longos de texto
+• Sempre priorizar organização visual
+• Explicar como se fosse falado
+• Usar exemplos concretos
+• Manter o conteúdo dinâmico
 
 REGRAS CRÍTICAS
 • não copiar exemplos do livro
