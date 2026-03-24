@@ -331,8 +331,22 @@ def generate_doc_from_template(uploaded_file, values):
     bio.seek(0)
     return bio
 
+def make_json_safe(obj):
+    if isinstance(obj, dict):
+        return {str(k): make_json_safe(v) for k, v in obj.items() if not str(k).startswith("FormSubmitter")}
+    if isinstance(obj, (list, tuple, set)):
+        return [make_json_safe(v) for v in obj]
+    if isinstance(obj, (datetime.date, datetime.datetime)):
+        return obj.strftime("%d/%m/%Y")
+    try:
+        json.dumps(obj)
+        return obj
+    except Exception:
+        return str(obj)
+
 def export_json(values):
-    return json.dumps(values, ensure_ascii=False, indent=2).encode("utf-8")
+    safe_values = make_json_safe(values)
+    return json.dumps(safe_values, ensure_ascii=False, indent=2).encode("utf-8")
 
 st.markdown("""
 <style>
