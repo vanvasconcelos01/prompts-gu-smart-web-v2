@@ -7,7 +7,7 @@ from pathlib import Path
 import streamlit as st
 from docx import Document
 
-st.set_page_config(page_title="Prompts Gu Smart V3", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="Prompts Gu Smart V4", page_icon="🧠", layout="wide")
 
 PLACEHOLDER_RE = re.compile(r"\[\s*([A-Z0-9_]+)\s*\]")
 BASE_MARKER = "[COLE AQUI O BLOCO BASE GLOBAL]"
@@ -127,171 +127,6 @@ Duração:
 Objetivo:
 """
 
-SMART_DAILY_TEMPLATE = """{BASE}
-
-AUTOMAÇÃO INTELIGENTE NÍVEL 2 — SESSÃO DO DIA
-
-CONTEXTO
-Matéria: {MATERIA}
-Conteúdo do dia: {CONTEUDO_DO_DIA}
-Data de hoje: {DATA_DE_HOJE}
-Data da prova: {DATA_DA_PROVA}
-Dias restantes até a prova: {DIAS_RESTANTES}
-Nível do aluno: {NIVEL_DO_ALUNO}
-Situação atual do conteúdo: {SITUACAO_CONTEUDO}
-Prioridade do conteúdo: {PRIORIDADE_DO_CONTEUDO}
-Intensidade recomendada para hoje: {INTENSIDADE}
-Tipo de material recomendado automaticamente: {TIPO_DE_MATERIAL}
-Modo de estudo hoje: {MODO_ESTUDO}
-
-REGRAS DE DECISÃO
-• Se faltarem 4 dias ou mais, priorize construção + compreensão + aplicação
-• Se faltarem 2 ou 3 dias, priorize consolidação + treino guiado + atenção a erros
-• Se faltar 1 dia, priorize revisão enxuta + segurança + precisão
-• Se o conteúdo for novo, comece com explicação curta e exemplos progressivos
-• Se o conteúdo já foi visto, avance mais rápido para prática e correção
-• Se houver dificuldade, reduza a complexidade inicial e aumente progressivamente
-
-MODO VISUAL AUTOMÁTICO (OBRIGATÓRIO)
-
-O conteúdo deve ser gerado sempre em formato visual, dinâmico e interativo, adequado para uma criança com TDAH.
-
-Você deve gerar a sessão completa nos seguintes formatos:
-
-1. ROTEIRO DE VÍDEO (PRINCIPAL)
-• Explicação como se fosse falada
-• Frases curtas e naturais
-• Incluir pausas para interação com o aluno
-• Fazer perguntas durante a explicação
-• Linguagem envolvente e clara
-• Simular um professor conversando com o aluno
-
-2. VERSÃO EM SLIDES (RESUMO VISUAL)
-• Transformar o conteúdo em slides
-• Cada slide com:
-  - título curto
-  - 2 a 4 pontos
-  - exemplos simples
-• Evitar texto longo
-• Priorizar clareza visual
-
-3. EXEMPLOS PROGRESSIVOS
-• 1 exemplo básico
-• 1 exemplo de aplicação
-• 1 desafio leve
-• Sempre com explicação clara
-
-4. PRÁTICA GUIADA
-• Exercícios com resolução passo a passo
-• Mostrar o raciocínio, não apenas a resposta
-
-5. MINI QUIZ
-• 3 perguntas rápidas
-• Misturar fácil + médio + desafio leve
-
-6. ORIENTAÇÃO PARA O RESPONSÁVEL
-• Como conduzir a explicação
-• Onde o aluno pode ter dificuldade
-• Como ajudar sem dar resposta
-
-REGRAS VISUAIS CRÍTICAS
-• Evitar blocos longos de texto
-• Sempre priorizar organização visual
-• Explicar como se fosse falado
-• Usar exemplos concretos
-• Manter o conteúdo dinâmico
-
-REGRAS CRÍTICAS
-• não copiar exemplos do livro
-• usar as fontes apenas para entender a habilidade cobrada
-• variar contextos
-• não infantilizar
-• mostrar lógica, não só resposta
-• manter a sessão dentro de {DURACAO_DESEJADA}
-
-FORMATO OBRIGATÓRIO
-[TIPO ESCOLHIDO AUTOMATICAMENTE]
-[OBJETIVO DA SESSÃO]
-[ROTEIRO DE VÍDEO]
-[SLIDES]
-[EXEMPLOS PROGRESSIVOS]
-[PRÁTICA GUIADA]
-[MINI QUIZ]
-[ORIENTAÇÃO PARA O RESPONSÁVEL]
-"""
-
-FULL_LESSON_TEMPLATE = """{BASE}
-
-GERAR AULA COMPLETA — MODO VISUAL AUTOMÁTICO
-
-CONTEXTO
-Matéria: {MATERIA}
-Conteúdo do dia: {CONTEUDO_DO_DIA}
-Data de hoje: {DATA_DE_HOJE}
-Data da prova: {DATA_DA_PROVA}
-Dias restantes até a prova: {DIAS_RESTANTES}
-Nível do aluno: {NIVEL_DO_ALUNO}
-Situação do conteúdo: {SITUACAO_CONTEUDO}
-Prioridade do conteúdo: {PRIORIDADE_DO_CONTEUDO}
-Duração desejada: {DURACAO_DESEJADA}
-Tipo de material recomendado automaticamente: {TIPO_DE_MATERIAL}
-Modo de estudo: {MODO_ESTUDO}
-
-OBJETIVO
-Criar uma aula completa, visual e interativa para o aluno, pronta para ser usada no NotebookLM com base nas fontes da matéria.
-
-DECISÃO PEDAGÓGICA
-• Se o conteúdo for novo, começar com construção clara e exemplos concretos
-• Se o conteúdo já foi visto, avançar mais rápido para treino e aplicação
-• Se houver dificuldade, reduzir a complexidade inicial e aumentar gradualmente
-• Se estiver perto da prova, priorizar precisão, revisão estratégica e segurança
-
-ENTREGA OBRIGATÓRIA
-
-1. VISÃO RÁPIDA DA AULA
-• objetivo em 1 ou 2 frases
-• habilidade principal do dia
-• erro comum que merece atenção
-
-2. ROTEIRO DE VÍDEO
-• abertura com gancho
-• explicação falada
-• pausas de interação
-• perguntas ao aluno
-• fechamento com mini desafio
-
-3. SLIDES DA AULA
-• slides curtos
-• títulos claros
-• tópicos objetivos
-• exemplos visuais
-
-4. EXEMPLOS PROGRESSIVOS
-• básico
-• aplicação
-• desafio leve
-
-5. PRÁTICA GUIADA
-• exercícios com resolução passo a passo
-• mostrar o raciocínio
-
-6. MINI QUIZ
-• 3 perguntas rápidas
-
-7. ORIENTAÇÃO PARA O RESPONSÁVEL
-• como conduzir
-• onde o aluno pode travar
-• como ajudar sem dar a resposta
-
-REGRAS CRÍTICAS
-• não copiar do livro
-• usar as fontes só para entender a habilidade cobrada
-• criar exemplos inéditos
-• manter linguagem clara, visual e respeitosa
-• não infantilizar
-• evitar blocos longos de texto
-"""
-
 def safe_format(template, values):
     data = {}
     data.update(DEFAULTS)
@@ -327,6 +162,112 @@ def recommend_mode(days_left, situacao):
         return "retomada estratégica"
     return "treino com consolidação"
 
+def make_prompt(kind, values):
+    common = safe_format("""{BASE}
+
+CONTEXTO
+Matéria: {MATERIA}
+Conteúdo do dia: {CONTEUDO_DO_DIA}
+Data da prova: {DATA_DA_PROVA}
+Dias restantes: {DIAS_RESTANTES}
+Nível do aluno: {NIVEL_DO_ALUNO}
+Situação do conteúdo: {SITUACAO_CONTEUDO}
+Prioridade: {PRIORIDADE_DO_CONTEUDO}
+Modo de estudo: {MODO_ESTUDO}
+
+IMPORTANTE
+• usar as fontes apenas para entender a habilidade cobrada
+• não copiar exemplos do livro
+• criar exemplos inéditos
+• manter linguagem clara, visual e respeitosa
+• não infantilizar
+""", values)
+
+    if kind == "video":
+        body = """MATERIAL PARA NOTEBOOKLM STUDIO — VIDEO OVERVIEW
+
+OBJETIVO
+Criar um Video Overview realmente visual, em português do Brasil, para uma criança de 9 anos, com foco em clareza, atenção curta e compreensão progressiva.
+
+INSTRUÇÕES OBRIGATÓRIAS
+• transformar o conteúdo em apresentação visual narrada
+• organizar em sequência lógica, como mini aula
+• usar exemplos inéditos
+• priorizar elementos visuais e comparações concretas
+• incluir 1 gancho inicial, 3 exemplos progressivos e 1 mini desafio final
+• destacar 1 erro comum
+
+ESTRUTURA
+1. abertura com gancho
+2. explicação visual da ideia central
+3. exemplo básico
+4. exemplo de aplicação
+5. desafio leve
+6. erro comum
+7. fechamento com mini desafio
+"""
+    elif kind == "audio":
+        body = """MATERIAL PARA NOTEBOOKLM STUDIO — AUDIO OVERVIEW
+
+OBJETIVO
+Criar um Audio Overview curto, dinâmico e claro, em português do Brasil, como se fosse um professor particular explicando o conteúdo ao aluno.
+
+INSTRUÇÕES OBRIGATÓRIAS
+• som de conversa guiada, não palestra longa
+• frases curtas
+• incluir perguntas para o aluno pensar
+• incluir 3 exemplos progressivos
+• reforçar 1 erro comum
+• fechar com mini revisão e encorajamento
+"""
+    elif kind == "slides":
+        body = """MATERIAL PARA NOTEBOOKLM STUDIO — SLIDES
+
+OBJETIVO
+Criar slides curtos, visuais e claros, para uma criança de 9 anos com atenção curta.
+
+INSTRUÇÕES OBRIGATÓRIAS
+• poucos slides
+• cada slide com título curto
+• no máximo 2 a 4 pontos por slide
+• usar exemplos visuais e concretos
+• progressão:
+  - slide 1: ideia central
+  - slide 2: exemplo básico
+  - slide 3: aplicação
+  - slide 4: erro comum
+  - slide 5: mini desafio
+"""
+    elif kind == "quiz":
+        body = """MATERIAL PARA NOTEBOOKLM STUDIO — QUIZ / FLASHCARDS
+
+OBJETIVO
+Criar um quiz rápido ou flashcards para revisão ativa, com progressão de dificuldade.
+
+INSTRUÇÕES OBRIGATÓRIAS
+• 5 itens no máximo
+• começar com confiança
+• avançar para aplicação
+• terminar com desafio leve
+• incluir pelo menos 1 erro comum
+• respostas com explicação curtíssima
+"""
+    else:
+        body = """MATERIAL PARA NOTEBOOKLM STUDIO — REPORT / RESUMO
+
+OBJETIVO
+Criar um resumo estratégico do conteúdo do dia, visualmente organizado, destacando o que mais importa.
+
+INSTRUÇÕES OBRIGATÓRIAS
+• resumir a ideia central
+• listar pontos-chave
+• destacar erro comum
+• incluir 1 exemplo curto
+• incluir 1 mini desafio
+• manter texto enxuto e muito claro
+"""
+    return common + "\n\n" + body
+
 def iter_paragraphs_in_table(table):
     for row in table.rows:
         for cell in row.cells:
@@ -351,8 +292,7 @@ def all_paragraphs(doc):
 def extract_placeholders(doc):
     found = set()
     for p in all_paragraphs(doc):
-        txt = p.text.replace("\\n", "")
-        found.update(PLACEHOLDER_RE.findall(txt))
+        found.update(PLACEHOLDER_RE.findall(p.text.replace("\n", "")))
     return sorted(found)
 
 def get_base_block_text_from_doc(doc):
@@ -367,16 +307,16 @@ def get_base_block_text_from_doc(doc):
     collected = []
     for p in paragraphs[start + 1:]:
         txt = p.text.strip()
-        if re.match(r"^\\d+\\.", txt):
+        if re.match(r"^\d+\.", txt):
             break
         collected.append(p.text)
-    return "\\n".join(collected).strip()
+    return "\n".join(collected).strip()
 
 def replace_in_runs(paragraph, replacements):
     full = paragraph.text
     new = full
     for key, value in replacements.items():
-        pattern = r"\\[\\s*" + re.escape(key) + r"\\s*\\]"
+        pattern = r"\[\s*" + re.escape(key) + r"\s*\]"
         new = re.sub(pattern, value, new)
     if new != full:
         if paragraph.runs:
@@ -416,17 +356,12 @@ def export_json(values):
 st.markdown("""
 <style>
 .block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
-.small-card {
-    border: 1px solid rgba(49,51,63,0.15);
-    border-radius: 16px;
-    padding: 14px 16px;
-    background: rgba(250,250,252,0.8);
-}
+.small-card {border: 1px solid rgba(49,51,63,0.15); border-radius: 16px; padding: 14px 16px; background: rgba(250,250,252,0.8);}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 Prompts Gu — Smart Web V3")
-st.caption("Agora com botão 'Gerar aula completa' e modo visual automático embutido.")
+st.title("Prompts Gu — Smart Web V4")
+st.caption("A aba 2 gera prompts separados para a aba Studio do NotebookLM.")
 
 with st.sidebar:
     st.header("Perfil base")
@@ -434,7 +369,7 @@ with st.sidebar:
         val = st.text_input(k, value=st.session_state.get(k, default), key="base_" + k)
         st.session_state[k] = val
 
-tab1, tab2, tab3 = st.tabs(["1. Cronograma", "2. Sessão inteligente", "3. DOCX"])
+tab1, tab2, tab3 = st.tabs(["1. Cronograma", "2. Studio", "3. DOCX"])
 
 with tab1:
     st.subheader("Montar cronograma até a prova")
@@ -450,26 +385,17 @@ with tab1:
     sec = p3.text_area("Prioridade baixa", value=st.session_state.get("CONTEUDOS_SECUNDARIOS", ""), height=120)
 
     values = dict(st.session_state)
-    values.update({
-        "MATERIA": materia,
-        "DATA_DE_HOJE": data_hoje,
-        "DATA_DA_PROVA": data_prova,
-        "OUTRAS_PROVAS_NO_PERIODO": outras,
-        "CONTEUDOS_DA_PROVA": conteudos,
-        "PRIORIDADES": prior,
-        "CONTEUDOS_MEDIOS": medios,
-        "CONTEUDOS_SECUNDARIOS": sec,
-    })
+    values.update({"MATERIA": materia, "DATA_DE_HOJE": data_hoje, "DATA_DA_PROVA": data_prova, "OUTRAS_PROVAS_NO_PERIODO": outras, "CONTEUDOS_DA_PROVA": conteudos, "PRIORIDADES": prior, "CONTEUDOS_MEDIOS": medios, "CONTEUDOS_SECUNDARIOS": sec})
     values["BASE"] = safe_format(BASE_BLOCK_TEMPLATE, values)
     prompt_crono = safe_format(CRONOGRAMA_TEMPLATE, values)
 
-    st.text_area("Prompt de cronograma", value=prompt_crono, height=420, key="cronograma_box")
+    st.text_area("Prompt de cronograma", value=prompt_crono, height=420)
     c1, c2 = st.columns(2)
-    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v3.txt")
-    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores_v3.json")
+    c1.download_button("Baixar prompt .txt", prompt_crono.encode("utf-8"), file_name="prompt_cronograma_v4.txt")
+    c2.download_button("Baixar JSON da aba", export_json(values), file_name="cronograma_valores_v4.json")
 
 with tab2:
-    st.subheader("Sessão inteligente do dia")
+    st.subheader("Gerar instruções para a aba Studio do NotebookLM")
     c1, c2, c3 = st.columns(3)
     materia2 = c1.text_input("Matéria", value=st.session_state.get("MATERIA", ""), key="t2_materia")
     conteudo_dia = c1.text_input("Conteúdo do dia", value=st.session_state.get("CONTEUDO_DO_DIA", ""))
@@ -499,45 +425,38 @@ with tab2:
     k3.markdown(f'<div class="small-card"><strong>Tipo recomendado</strong><br>{tipo}</div>', unsafe_allow_html=True)
 
     values2 = dict(st.session_state)
-    values2.update({
-        "MATERIA": materia2,
-        "CONTEUDO_DO_DIA": conteudo_dia,
-        "DATA_DE_HOJE": data_hoje2,
-        "DATA_DA_PROVA": data_prova2,
-        "DIAS_RESTANTES": dias_restantes,
-        "SITUACAO_CONTEUDO": situacao,
-        "PRIORIDADE_DO_CONTEUDO": prioridade_conteudo,
-        "TIPO_DE_MATERIAL": tipo,
-        "INTENSIDADE": intensidade,
-        "MODO_ESTUDO": modo,
-        "NIVEL_DO_ALUNO": nivel,
-        "DURACAO_DESEJADA": duracao
-    })
+    values2.update({"MATERIA": materia2, "CONTEUDO_DO_DIA": conteudo_dia, "DATA_DE_HOJE": data_hoje2, "DATA_DA_PROVA": data_prova2, "DIAS_RESTANTES": dias_restantes, "SITUACAO_CONTEUDO": situacao, "PRIORIDADE_DO_CONTEUDO": prioridade_conteudo, "TIPO_DE_MATERIAL": tipo, "INTENSIDADE": intensidade, "MODO_ESTUDO": modo, "NIVEL_DO_ALUNO": nivel, "DURACAO_DESEJADA": duracao})
     values2["BASE"] = safe_format(BASE_BLOCK_TEMPLATE, values2)
-    prompt_day = safe_format(SMART_DAILY_TEMPLATE, values2)
-    full_lesson_prompt = safe_format(FULL_LESSON_TEMPLATE, values2)
 
-    st.text_area("Prompt diário inteligente", value=prompt_day, height=370, key="sessao_box")
+    video_txt = make_prompt("video", values2)
+    audio_txt = make_prompt("audio", values2)
+    slides_txt = make_prompt("slides", values2)
+    quiz_txt = make_prompt("quiz", values2)
+    report_txt = make_prompt("report", values2)
 
-    b1, b2, b3 = st.columns(3)
-    b1.download_button("Baixar prompt do dia .txt", prompt_day.encode("utf-8"), file_name="prompt_dia_inteligente_v3.txt")
-    b2.download_button("Baixar JSON da sessão", export_json(values2), file_name="sessao_valores_v3.json")
-    if b3.button("Gerar aula completa"):
-        st.session_state["full_lesson_prompt"] = full_lesson_prompt
+    st.info("Use cada bloco abaixo no tipo certo de material dentro da aba Studio do NotebookLM.")
 
-    if st.session_state.get("full_lesson_prompt"):
-        st.subheader("Aula completa pronta para colar no NotebookLM")
-        st.text_area(
-            "Prompt aula completa",
-            value=st.session_state["full_lesson_prompt"],
-            height=520,
-            key="full_lesson_box"
-        )
-        st.download_button(
-            "Baixar aula completa .txt",
-            st.session_state["full_lesson_prompt"].encode("utf-8"),
-            file_name="aula_completa_v3.txt"
-        )
+    with st.expander("Prompt para Video Overview", expanded=True):
+        st.text_area("Video Overview", value=video_txt, height=260)
+        st.download_button("Baixar prompt de vídeo", video_txt.encode("utf-8"), file_name="studio_video_overview_v4.txt")
+
+    with st.expander("Prompt para Audio Overview"):
+        st.text_area("Audio Overview", value=audio_txt, height=220)
+        st.download_button("Baixar prompt de áudio", audio_txt.encode("utf-8"), file_name="studio_audio_overview_v4.txt")
+
+    with st.expander("Prompt para Slides"):
+        st.text_area("Slides", value=slides_txt, height=220)
+        st.download_button("Baixar prompt de slides", slides_txt.encode("utf-8"), file_name="studio_slides_v4.txt")
+
+    with st.expander("Prompt para Quiz / Flashcards"):
+        st.text_area("Quiz / Flashcards", value=quiz_txt, height=220)
+        st.download_button("Baixar prompt de quiz", quiz_txt.encode("utf-8"), file_name="studio_quiz_v4.txt")
+
+    with st.expander("Prompt para Report / Resumo"):
+        st.text_area("Report / Resumo", value=report_txt, height=200)
+        st.download_button("Baixar prompt de report", report_txt.encode("utf-8"), file_name="studio_report_v4.txt")
+
+    st.download_button("Baixar JSON da sessão", export_json(values2), file_name="studio_valores_v4.json")
 
 with tab3:
     st.subheader("Preencher seu DOCX")
@@ -584,8 +503,8 @@ with tab3:
         x1, x2 = st.columns(2)
         if x1.button("Preparar DOCX preenchido"):
             output = generate_doc_from_template(uploaded, values3)
-            name = Path(uploaded.name).stem + "_preenchido_v3_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
+            name = Path(uploaded.name).stem + "_preenchido_v4_" + datetime.datetime.now().strftime("%Y%m%d_%H%M") + ".docx"
             st.download_button("Baixar DOCX preenchido", data=output.getvalue(), file_name=name, mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-        x2.download_button("Baixar JSON do DOCX", export_json(values3), file_name="docx_valores_v3.json")
+        x2.download_button("Baixar JSON do DOCX", export_json(values3), file_name="docx_valores_v4.json")
     else:
         st.info("Envie o arquivo de prompts em .docx para preencher aqui.")
